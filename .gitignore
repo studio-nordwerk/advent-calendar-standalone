@@ -1,0 +1,7 @@
+.DS_Store
+/dist/
+/adventskalender/inhalte/kalender.local.php
+/adventskalender/inhalte/bilder/*
+!/adventskalender/inhalte/bilder/.gitkeep
+/test-bilder/
+!/adventskalender/inhalte/bilder/muster-*.jpg
