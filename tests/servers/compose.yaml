@@ -1,0 +1,60 @@
+# Prüft den Schutz auf den üblichen Servern. Start über tests/server-check.sh.
+# SITE zeigt auf eine Kopie des Repos mit Testeinstellungen.
+
+services:
+  # Shared Hosting: Apache mit .htaccess, Kalender in einem Unterordner (/shop)
+  apache:
+    image: php:8.3-apache
+    ports: ["8101:80"]
+    volumes:
+      - ${SITE}:/var/www/html/shop:ro
+      - ./apache-allowoverride.conf:/etc/apache2/conf-enabled/zz-allowoverride.conf:ro
+
+  # Apache ohne .htaccess, Sperre aus examples/apache-vhost.conf
+  apache-none:
+    image: php:8.3-apache
+    ports: ["8102:80"]
+    volumes:
+      - ${SITE}:/var/www/html:ro
+      - ../../examples/apache-vhost.conf:/etc/apache2/conf-enabled/zz-adventskalender.conf:ro
+
+  # nginx + PHP-FPM mit examples/nginx.conf
+  php-fpm:
+    image: php:8.3-fpm
+    volumes:
+      - ${SITE}:/var/www/html:ro
+  nginx:
+    image: nginx:1.27-alpine
+    ports: ["8103:80"]
+    depends_on: [php-fpm]
+    volumes:
+      - ${SITE}:/var/www/html:ro
+      - ./nginx-site.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../../examples/nginx.conf:/etc/nginx/adventskalender.conf:ro
+
+  # nginx ohne Sperre: hier MUSS die Prüfung anschlagen
+  nginx-open:
+    image: nginx:1.27-alpine
+    ports: ["8106:80"]
+    depends_on: [php-fpm]
+    volumes:
+      - ${SITE}:/var/www/html:ro
+      - ./nginx-open.conf:/etc/nginx/conf.d/default.conf:ro
+
+  # Caddy + PHP-FPM, Regel wie in examples/Caddyfile
+  caddy:
+    image: caddy:2.8-alpine
+    ports: ["8104:80"]
+    depends_on: [php-fpm]
+    volumes:
+      - ${SITE}:/var/www/html:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+
+  # Eingebauter PHP-Server mit examples/php-server.php
+  builtin:
+    image: php:8.3-cli
+    ports: ["8105:80"]
+    working_dir: /var/www/html
+    command: php -S 0.0.0.0:80 examples/php-server.php
+    volumes:
+      - ${SITE}:/var/www/html:ro

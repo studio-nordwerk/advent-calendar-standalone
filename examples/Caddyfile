@@ -1,0 +1,13 @@
+# Caddy + PHP-FPM: vollständige Seite. Caddy liest keine .htaccess,
+# deshalb sperrt @adventskalender die beiden Ordner.
+
+ihre-seite.de {
+    root * /var/www/html
+    encode zstd gzip
+
+    @adventskalender path /adventskalender/inhalte/* /adventskalender/lib/*
+    respond @adventskalender 404
+
+    php_fastcgi unix//run/php/php8.3-fpm.sock
+    file_server
+}

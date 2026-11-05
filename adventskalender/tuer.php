@@ -8,43 +8,46 @@ declare(strict_types=1);
  *   tuer.php?day=5          → {"state":"open","html":"…","thumb":"…"} oder {"state":"early"} / {"state":"past"} / {"state":"empty"}
  *   tuer.php?day=5&bild=1   → das Bild des Türchens (nur, wenn es offen ist)
  *
+ * Nur Bilder mit der Endung jpg, jpeg, png, webp, avif oder gif werden ausgeliefert.
+ *
  * Dieselbe Antwort liefert auch das Contao-Paket. Wer den Kalender in eine andere
  * Umgebung einbaut (z. B. Astro), muss nur diese kleine Schnittstelle nachbauen.
  */
 
-require __DIR__.'/lib/DoorRules.php';
 require __DIR__.'/lib/config.php';
 
-use HeikeWiese\ContaoAdventCalendarBundle\Calendar\DoorRules;
+use Nordwerk\AdventCalendar\DoorRules;
 
 $config = adventskalender_config();
 $day = (int) ($_GET['day'] ?? 0);
-$timezone = new DateTimeZone($config['zeitzone'] ?? 'Europe/Berlin');
-$today = new DateTimeImmutable('now', $timezone);
-$testDate = '';
-
-if (($config['testdatum_erlaubt'] ?? false) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($_GET['heute'] ?? ''))) {
-    $testDate = $_GET['heute'];
-    $today = new DateTimeImmutable($testDate, $timezone);
-}
+[$today, $testDate] = adventskalender_today($config);
 
 $state = DoorRules::state($day, $today, (int) ($config['jahr'] ?? 0), (bool) ($config['vergangene_offen'] ?? true), (bool) ($config['demo'] ?? false));
 $door = $config['tuerchen'][$day] ?? null;
 
 header('Cache-Control: private, no-store');
 header('X-Robots-Tag: noindex');
+header('X-Content-Type-Options: nosniff');
 
 // Bild ausliefern
 if (isset($_GET['bild'])) {
     $file = $door['bild'] ?? '';
-    $path = realpath(__DIR__.'/inhalte/bilder/'.basename($file));
+    $path = realpath(adventskalender_inhalte_dir().'/bilder/'.basename((string) $file));
 
     if (DoorRules::OPEN !== $state || !$file || !$path || !is_file($path)) {
         http_response_code(404);
         exit;
     }
 
-    header('Content-Type: '.(mime_content_type($path) ?: 'application/octet-stream'));
+    $types = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp', 'avif' => 'image/avif', 'gif' => 'image/gif'];
+    $type = $types[strtolower(pathinfo($path, PATHINFO_EXTENSION))] ?? null;
+
+    if (!$type) {
+        http_response_code(404);
+        exit;
+    }
+
+    header('Content-Type: '.$type);
     header('Content-Length: '.filesize($path));
     readfile($path);
     exit;
@@ -53,12 +56,12 @@ if (isset($_GET['bild'])) {
 header('Content-Type: application/json; charset=utf-8');
 
 if (DoorRules::OPEN !== $state) {
-    echo json_encode(['state' => $state]);
+    echo json_encode(['state' => $state], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 if (!$door) {
-    echo json_encode(['state' => 'empty']);
+    echo json_encode(['state' => 'empty'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -85,4 +88,4 @@ ob_start();
 <?php endif; ?>
 </article>
 <?php
-echo json_encode(['state' => 'open', 'html' => ob_get_clean(), 'thumb' => $image]);
+echo json_encode(['state' => 'open', 'html' => ob_get_clean(), 'thumb' => $image], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
