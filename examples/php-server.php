@@ -9,7 +9,8 @@
  * .htaccess; diese Datei sperrt die Ordner inhalte und lib stattdessen.
  */
 
-$path = rawurldecode((string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH));
+// Nicht parse_url(): Es hielte bei „//adventskalender/…“ den ersten Teil für einen Hostnamen.
+$path = rawurldecode(strtok((string) ($_SERVER['REQUEST_URI'] ?? '/'), '?') ?: '/');
 $path = preg_replace('#/+#', '/', str_replace('\\', '/', $path));
 
 if (preg_match('#/adventskalender/(inhalte|lib)(/|$)#i', $path) || str_contains($path, '/../') || str_contains($path, '/./')) {

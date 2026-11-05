@@ -49,6 +49,7 @@ check() {
     blocked "$base$prefix/adventskalender/inhalte/bilder/muster-08-weihnachten.jpg" "Bild von Türchen 24"
     blocked "$base$prefix/adventskalender/inhalte//bilder/muster-08-weihnachten.jpg" "Bild mit doppeltem Schrägstrich"
     blocked "$base$prefix/adventskalender/%69nhalte/schutz-test.txt" "Testdatei, kodierte Adresse"
+    blocked "$base/$prefix/adventskalender/inhalte/bilder/muster-08-weihnachten.jpg" "Bild mit führendem //"
     blocked "$base$prefix/adventskalender/inhalte/kalender.php" "kalender.php"
     blocked "$base$prefix/adventskalender/inhalte/bilder/" "Ordnerliste der Bilder"
     blocked "$base$prefix/adventskalender/lib/config.php" "lib/config.php"

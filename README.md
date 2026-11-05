@@ -21,7 +21,7 @@ Keine Datenbank, kein jQuery, keine Cookies.
    <?php include $_SERVER['DOCUMENT_ROOT'].'/adventskalender/einbinden.php'; ?>
    ```
 
-   Die Seite muss dafür auf `.php` enden. Eine fertige Beispielseite ist `beispiel.php`. Ist Ihre Seite kein PHP (reines HTML, Baukasten), laden Sie `beispiel.php` mit hoch, passen Überschrift und Farben an und verlinken sie aus Ihrem Menü.
+   Liegt `adventskalender` in einem Unterordner, den Pfad anpassen, z. B. `'/shop/adventskalender/einbinden.php'`. Die Seite muss auf `.php` enden. Eine fertige Beispielseite ist `beispiel.php`. Ist Ihre Seite kein PHP (reines HTML, Baukasten), laden Sie `beispiel.php` mit hoch, passen Überschrift und Farben an und verlinken sie aus Ihrem Menü.
 5. **Prüfen:** `https://ihre-seite.de/adventskalender/pruefen.php` aufrufen. Die Seite zeigt, ob alles bereit ist und ob Ihre Inhalte geschützt sind. Alles grün? Fertig.
 
 ## Wo läuft Ihre Seite?
@@ -43,9 +43,9 @@ Unsicher? Rufen Sie `https://ihre-seite.de/adventskalender/inhalte/schutz-test.t
 
 Viele Hoster erlauben Ordner neben dem Webverzeichnis, an die kein Besucher herankommt. Dann spielt der Server keine Rolle mehr:
 
-1. Den Ordner `adventskalender/inhalte` eine Ebene über Ihr Webverzeichnis verschieben und in `adventskalender-inhalte` umbenennen.
-2. In `adventskalender/inhalte-ort.php` die Zeile `return dirname(__DIR__, 2).'/adventskalender-inhalte';` eintragen.
-3. Mit der Prüfseite kontrollieren: Sie meldet dann „Inhalte liegen außerhalb des Webverzeichnisses“.
+1. Den Ordner `adventskalender/inhalte` neben Ihr Webverzeichnis verschieben (nicht hinein) und in `adventskalender-inhalte` umbenennen. Den vollständigen Pfad zeigt Ihr Hoster meist im Dateimanager oder in den Paketdaten, z. B. `/home/kunde/adventskalender-inhalte`.
+2. In `adventskalender/inhalte-ort.php` diesen Pfad eintragen: `return '/home/kunde/adventskalender-inhalte';`
+3. Mit der Prüfseite kontrollieren: Sie meldet „Inhalte gefunden“ und „Inhalte liegen außerhalb des Webverzeichnisses“. Ein Symlink im Webverzeichnis zählt nicht, er bleibt von außen erreichbar.
 
 ## Vorschau und Testen
 

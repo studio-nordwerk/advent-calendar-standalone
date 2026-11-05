@@ -34,9 +34,18 @@ try {
 
 $base = adventskalender_url($config ?? []);
 $contentDir = adventskalender_inhalte_dir();
-$root = realpath((string) ($_SERVER['DOCUMENT_ROOT'] ?? ''));
+// Außerhalb nur, wenn sowohl der eingetragene als auch der aufgelöste Pfad außerhalb liegen
+// (ein Symlink im Webverzeichnis bleibt von außen erreichbar).
+$under = static function (string $path, string $root): bool {
+    $path = rtrim(str_replace('\\', '/', $path), '/').'/';
+    $root = rtrim(str_replace('\\', '/', $root), '/').'/';
+
+    return str_starts_with($path, $root);
+};
+$documentRoot = (string) ($_SERVER['DOCUMENT_ROOT'] ?? '');
+$root = realpath($documentRoot);
 $real = realpath($contentDir);
-$outside = $root && $real && !str_starts_with(str_replace('\\', '/', $real).'/', rtrim(str_replace('\\', '/', $root), '/').'/');
+$outside = $root && $real && !$under($real, $root) && !$under($contentDir, $root) && !$under($contentDir, $documentRoot);
 
 if ($outside) {
     $add('ok', 'Inhalte liegen außerhalb des Webverzeichnisses', 'Am sichersten: Kein Besucher kommt an diese Dateien, egal welcher Server läuft.');
@@ -110,12 +119,9 @@ $labels = ['ok' => 'In Ordnung', 'hinweis' => 'Hinweis', 'fehler' => 'Bitte behe
 <?php foreach ($checks as [$status, $title, $detail]): ?>
         <li data-status="<?= $status ?>"><span class="status"><?= $labels[$status] ?></span><strong><?= $e($title) ?></strong><?php if ($detail): ?><small><?= $e($detail) ?></small><?php endif; ?></li>
 <?php endforeach; ?>
-<?php if (!$outside): ?>
         <li data-status="hinweis" id="protection"><span class="status">Wird geprüft …</span><strong>Schutz des Ordners inhalte</strong><small>Der Browser versucht, eine Testdatei aus dem Ordner direkt abzurufen.</small></li>
-<?php endif; ?>
     </ul>
 </main>
-<?php if (!$outside): ?>
 <script>
 (async () => {
     const item = document.getElementById('protection');
@@ -139,6 +145,5 @@ $labels = ['ok' => 'In Ordnung', 'hinweis' => 'Hinweis', 'fehler' => 'Bitte behe
     }
 })();
 </script>
-<?php endif; ?>
 </body>
 </html>

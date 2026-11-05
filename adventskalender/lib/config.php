@@ -69,7 +69,8 @@ function adventskalender_url(array $config): string
         $dir = str_replace('\\', '/', $dir);
 
         if (str_starts_with($dir.'/', $root.'/')) {
-            return substr($dir, strlen($root));
+            // Ordnernamen mit Leer- oder Sonderzeichen (#, ?, %) für die Adresse kodieren
+            return implode('/', array_map('rawurlencode', explode('/', substr($dir, strlen($root)))));
         }
     }
 
