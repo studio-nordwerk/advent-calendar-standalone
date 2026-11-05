@@ -3,5 +3,6 @@
 /adventskalender/inhalte/kalender.local.php
 /adventskalender/inhalte/bilder/*
 !/adventskalender/inhalte/bilder/.gitkeep
+!/adventskalender/inhalte/bilder/index.html
 /test-bilder/
 !/adventskalender/inhalte/bilder/muster-*.jpg

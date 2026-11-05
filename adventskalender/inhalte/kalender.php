@@ -3,7 +3,7 @@
 /*
  * Inhalte des Adventskalenders
  *
- * Dieser Ordner ist für Besucher gesperrt (.htaccess). Texte und Bilder kommen
+ * Dieser Ordner ist für Besucher gesperrt (.htaccess bzw. Server-Einstellung, siehe README). Texte und Bilder kommen
  * erst an ihrem Tag über tuer.php auf die Seite – vorab lässt sich nichts ansehen.
  *
  * Bilder in den Ordner inhalte/bilder legen (Querformat, etwa 1200 × 800 Pixel, JPG oder WebP)
@@ -17,8 +17,10 @@ return [
     // true = vergangene Türchen bleiben offen, false = nur das heutige Türchen geht auf
     'vergangene_offen' => true,
 
-    // true = alle Türchen offen, zum Vorzeigen vor dem 1. Dezember. Für den echten Einsatz auf false!
-    'demo' => true,
+    // Vorschau: true = bis zum 30. November sind alle Türchen offen, zum Vorzeigen und Prüfen.
+    // Am 1. Dezember endet die Vorschau von selbst. Sind schon echte Gutscheincodes eingetragen,
+    // lieber false: Sonst sind sie bis dahin für alle sichtbar.
+    'demo' => false,
 
     // Türchen gemischt anordnen (wie ein echter Kalender)
     'gemischt' => true,
@@ -32,8 +34,12 @@ return [
 
     'zeitzone' => 'Europe/Berlin',
 
-    // Nur zum Testen: erlaubt tuer.php?heute=2026-12-10. Für den echten Einsatz auf false!
+    // Nur zum Testen: erlaubt seite.php?heute=2026-12-10. Für den echten Einsatz auf false!
     'testdatum_erlaubt' => false,
+
+    // Öffentliche Adresse des Ordners adventskalender. Leer = wird selbst erkannt.
+    // Nur nötig, wenn Bilder oder Türchen nicht laden, z. B. '/shop/adventskalender'
+    'adresse' => '',
 
     // Felder je Türchen:
     //   dachzeile      kleine Zeile über der Überschrift, z. B. 'Unser Tagesangebot'

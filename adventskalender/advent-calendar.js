@@ -34,15 +34,32 @@
         }
     };
 
+    // Heutiges Datum [Jahr, Monat, Tag] in der Zeitzone des Kalenders, nicht in der des Besuchers
+    const todayParts = (root) => {
+        if (root.dataset.today) {
+            return root.dataset.today.split('-').map(Number);
+        }
+
+        try {
+            const parts = new Intl.DateTimeFormat('en-CA', { timeZone: root.dataset.timezone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+
+            return parts.split('-').map(Number);
+        } catch (e) {
+            const now = new Date();
+
+            return [now.getFullYear(), now.getMonth() + 1, now.getDate()];
+        }
+    };
+
     // Nur fürs Aussehen; ob ein Türchen wirklich aufgeht, entscheidet der Server.
     const stateFor = (day, root) => {
         if (root.dataset.demo === '1') {
             return 'open';
         }
 
-        const now = root.dataset.today ? new Date(`${root.dataset.today}T12:00:00`) : new Date();
+        const [y, m, d] = todayParts(root);
         const year = parseInt(root.dataset.year, 10);
-        const today = now.getFullYear() === year && now.getMonth() === 11 ? now.getDate() : (now.getFullYear() > year ? 99 : 0);
+        const today = y === year && m === 12 ? d : (y > year ? 99 : 0);
 
         if (day > today) {
             return 'early';
@@ -117,11 +134,19 @@
     };
 
     const init = (root) => {
+        if (root.dataset.ready) {
+            return;
+        }
+
+        root.dataset.ready = '1';
+
         const url = root.dataset.adventCalendar;
+        // Je Kalender und Jahr merken, damit ein neuer Jahrgang mit geschlossenen Türchen beginnt
+        const key = `${url}|${root.dataset.year}`;
         const dialog = root.querySelector('.advent-calendar__dialog');
         const content = root.querySelector('.advent-calendar__content');
         const demo = root.dataset.demo === '1';
-        const opened = demo ? {} : readOpened(url);
+        const opened = demo ? {} : readOpened(key);
 
         // Fenster beim Klick auf den dunklen Hintergrund schließen
         dialog.addEventListener('click', (event) => {
@@ -146,7 +171,8 @@
             door.classList.add(`advent-calendar__door--${state}`);
 
             if (day in opened && state !== 'early') {
-                showOpen(door, opened[day]);
+                // Vergangene Türchen, die wieder zu sind: als geöffnet markieren, aber ohne Bild
+                showOpen(door, state === 'past' ? '' : opened[day]);
             }
 
             door.addEventListener('click', async () => {
@@ -164,7 +190,7 @@
                         showOpen(door, data.thumb);
 
                         if (!demo) {
-                            rememberOpened(url, day, data.thumb);
+                            rememberOpened(key, day, data.thumb);
                         }
                     } else if (data.state === 'early') {
                         html = root.dataset.textEarly.replace('%s', day);

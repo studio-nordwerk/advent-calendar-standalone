@@ -1,1 +1,8 @@
-Require all denied
+# Kein Zugriff von außen. Apache 2.4 (und 2.2 als Rückfall).
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>

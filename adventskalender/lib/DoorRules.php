@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace HeikeWiese\ContaoAdventCalendarBundle\Calendar;
+namespace Nordwerk\AdventCalendar;
 
 /**
- * Entscheidet, ob ein Türchen aufgehen darf. Ohne Contao, damit es sich einfach testen lässt.
+ * Entscheidet, ob ein Türchen aufgehen darf. Reines PHP ohne Abhängigkeiten, damit es sich einfach testen
+ * und in andere Umgebungen übertragen lässt.
  */
 final class DoorRules
 {
@@ -16,7 +17,7 @@ final class DoorRules
     /**
      * @param int  $year     Kalenderjahr; 0 = jedes Jahr (das Jahr von $today)
      * @param bool $keepOpen Vergangene Türchen bleiben offen
-     * @param bool $demo     Demo-Modus: alle Türchen offen
+     * @param bool $demo     Vorschau: vor dem 1. Dezember sind alle Türchen offen
      */
     public static function state(int $day, \DateTimeImmutable $today, int $year = 0, bool $keepOpen = true, bool $demo = false): string
     {
@@ -24,7 +25,7 @@ final class DoorRules
             return self::EARLY;
         }
 
-        if ($demo) {
+        if (self::demoActive($today, $year, $demo)) {
             return self::OPEN;
         }
 
@@ -41,6 +42,21 @@ final class DoorRules
         }
 
         return self::PAST;
+    }
+
+    /**
+     * Die Vorschau endet von selbst am 1. Dezember. Wer vergisst, sie abzuschalten, verrät so
+     * im Dezember keine Türchen vorab.
+     */
+    public static function demoActive(\DateTimeImmutable $today, int $year, bool $demo): bool
+    {
+        if (!$demo) {
+            return false;
+        }
+
+        $year = $year ?: (int) $today->format('Y');
+
+        return $today->format('Y-m-d') < \sprintf('%04d-12-01', $year);
     }
 
     /**

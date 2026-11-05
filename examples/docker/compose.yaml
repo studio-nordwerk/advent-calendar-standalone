@@ -1,0 +1,14 @@
+# Adventskalender mit Docker (Apache + PHP). Aus diesem Ordner starten:
+#
+#   docker compose up
+#
+# Danach http://localhost:8080/beispiel.php öffnen. Das offizielle Image php:apache
+# beachtet die mitgelieferten .htaccess-Dateien, eine eigene Einstellung ist nicht nötig.
+
+services:
+  web:
+    image: php:8.3-apache
+    ports:
+      - "8080:80"
+    volumes:
+      - ../..:/var/www/html:ro

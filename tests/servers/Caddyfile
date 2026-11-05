@@ -1,0 +1,9 @@
+:80 {
+    root * /var/www/html
+
+    @adventskalender path /adventskalender/inhalte/* /adventskalender/lib/*
+    respond @adventskalender 404
+
+    php_fastcgi php-fpm:9000
+    file_server
+}
